@@ -1,228 +1,231 @@
-#A1
-import pandas as pd
-import numpy as np
-file_path = r"C:\Users\vvmad\Downloads\5th\ML\Lab Session Data.xlsx"
-buying_data = pd.read_excel(file_path, sheet_name = 'Purchase data')
-matA = buying_data[['Candies (#)', 'Mangoes (Kg)', 'Milk Packets (#)']].dropna().values
-matC = buying_data['Payment (Rs)'].dropna().values
-dim = matA.shape[1]
-n_vec = matA.shape[0]
-rank = np.linalg.matrix_rank(matA)
-A_pseudo_inv = np.linalg.pinv(matA)
-matX = A_pseudo_inv @ matC
-
-print("Dimensionality = : ",dim)
-print("No of vectors = ",n_vec)
-print("Rank of matA: ",rank)
-print("Cost of products:")
-print("Candies {:.2f}".format(matX[0]))
-print("Mangoes-Rs: {:.2f}".format(matX[1]))
-print("Milk Packets-Rs: {:.2f}".format(matX[2]))
-
-
-
-#A2
-#Same as A1
-
-
-
-#A3
-buying_data['status'] = buying_data['Payment (Rs)'].apply(lambda x: "RICH" if x > 200 else "POOR")
-print(buying_data[['Payment (Rs)', 'status']].head())
-
-
-
-#A4
-import pandas as pd
-import numpy as np
-import statistics
-import matplotlib.pyplot as plt
-
-file_path = r"C:\Users\vvmad\Downloads\5th\ML\Lab Session Data.xlsx"
-buying_data = pd.read_excel(file_path, sheet_name = 'IRCTC Stock Price')
-
-data_of_price = buying_data.iloc[:, 3]
-mean = statistics.mean(data_of_price)
-variance = statistics.variance(data_of_price)
-print("Mean = ",mean)
-print("Variance = ",variance)
-
-buying_data['Date'] = pd.to_datetime(buying_data['Date'])
-wednesday = buying_data[buying_data['Date'].dt.day_name() == 'Wednesday']
-mean_wed = statistics.mean(wednesday['Price'])
-print(f"Wednesday mean: {mean_wed:.2f}")
-print(f"Wednesday Comparison : {mean_wed - mean:.2f}")
-
-apr_data = buying_data[buying_data['Date'].dt.month == 4]
-mean_apr = statistics.mean(apr_data['Price'])
-print(f"April data: {mean_apr: .2f}")
-print(f"April comparison : {mean_apr - mean:.2f}")
-
-chg = buying_data.iloc[:, 8]
-loss_prob = np.mean(chg < 0)
-print(f"Probability of Loss: {loss_prob:.2f}")
-
-wed_prof = wednesday[chg < 0].shape[0]
-total_wed = wednesday.shape[0]
-prob_wed_prof = 1-(wed_prof/total_wed)
-print(f"Probability of Making a Profit on Wednesday: {prob_wed_prof:.2f}")
-
-prof_if_wed = prob_wed_prof
-print(f"Profit if wednesday: {prof_if_wed}")
-
-buying_data['Day of Week'] = buying_data['Date'].dt.day_name()
-plt.figure(figsize=(3,3))
-plt.scatter(buying_data['Day of Week'], buying_data['Chg%'])
-plt.title('Plot')
-plt.xlabel('Day')
-plt.ylabel('Chg%')
-plt.xticks(rotation=45)
-plt.grid(True)
-plt.show()
-
-
-
-#A5
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, LabelEncoder
 from sklearn.metrics import pairwise_distances
-from sklearn.preprocessing import LabelEncoder
 from scipy.spatial.distance import cosine
+import statistics
+
+#A1
+def a2_q1(file_path):
+    buying_data = pd.read_excel(file_path, sheet_name='Purchase data')
+    matA = buying_data[['Candies (#)', 'Mangoes (Kg)', 'Milk Packets (#)']].dropna().values #drop empty values
+    matC = buying_data['Payment (Rs)'].dropna().values #drop empty values
+    dim = matA.shape[1] #inbuilt func
+    n_vec = matA.shape[0] #inbuilt func
+    rank = np.linalg.matrix_rank(matA) #inbuilt func
+    A_pseudo_inv = np.linalg.pinv(matA) #inbuilt func
+    matX = A_pseudo_inv @ matC 
+
+    print("Dimensionality = : ", dim)
+    print("No of vectors = ", n_vec)
+    print("Rank of matA: ", rank)
+    print("Cost of products:")
+    print("Candies {:.2f}".format(matX[0]))
+    print("Mangoes-Rs: {:.2f}".format(matX[1]))
+    print("Milk Packets-Rs: {:.2f}".format(matX[2]))
+
+#A2
+def a2_q2(file_path):
+    a2_q1(file_path)
+
+#A3
+def a2_q3(file_path):
+    buying_data = pd.read_excel(file_path, sheet_name='Purchase data')
+    buying_data['status'] = buying_data['Payment (Rs)'].apply(lambda x: "RICH" if x > 200 else "POOR")
+    print(buying_data[['Payment (Rs)', 'status']].head())
+
+#A4
+def a2_q4(file_path):
+    buying_data = pd.read_excel(file_path, sheet_name='IRCTC Stock Price')
+
+    buying_data['Date'] = pd.to_datetime(buying_data['Date'])
+
+    buying_data['Day of Week'] = buying_data['Date'].dt.day_name()
+
+    data_of_price = buying_data.iloc[:, 3]
+    mean = statistics.mean(data_of_price)
+    variance = statistics.variance(data_of_price)
+    print("Mean = ", mean)
+    print("Variance = ", variance)
+
+    wednesday = buying_data[buying_data['Date'].dt.day_name() == 'Wednesday']
+    mean_wed = statistics.mean(wednesday['Price'])
+    print(f"Wednesday mean: {mean_wed:.2f}")
+    print(f"Wednesday Comparison: {mean_wed - mean:.2f}")
+
+    apr_data = buying_data[buying_data['Date'].dt.month == 4]
+    mean_apr = statistics.mean(apr_data['Price'])
+    print(f"April data: {mean_apr:.2f}")
+    print(f"April comparison: {mean_apr - mean:.2f}")
+
+    chg = buying_data.iloc[:, 8]
+    loss_prob = np.mean(chg < 0)
+    print(f"Probability of Loss: {loss_prob:.2f}")
+
+    wed_prof = wednesday[chg < 0].shape[0]
+    total_wed = wednesday.shape[0]
+    prob_wed_prof = 1 - (wed_prof / total_wed)
+    print(f"Probability of Making a Profit on Wednesday: {prob_wed_prof:.2f}")
+
+    plt.figure(figsize=(3, 3))
+    plt.scatter(buying_data['Day of Week'], buying_data['Chg%'])
+    plt.title('Plot')
+    plt.xlabel('Day')
+    plt.ylabel('Chg%')
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    plt.show()
 
 
-file_path = r"C:\Users\vvmad\Downloads\5th\ML\Lab Session Data.xlsx"
-thyroid_data = pd.read_excel(file_path, sheet_name = 'thyroid0387_UCI')
+#A5
+def a2_q5(file_path):
+    thyroid_data = pd.read_excel(file_path, sheet_name='thyroid0387_UCI')
+    print(thyroid_data.dtypes)
 
-thyroid_data.head()
+    td_encoded = pd.get_dummies(thyroid_data, drop_first=True)
+    print(td_encoded.head())
 
-type_of_attribute = thyroid_data.dtypes
-print(type_of_attribute)
+    numeric_summary = thyroid_data.describe()
+    print(numeric_summary)
 
-td_encoded = pd.get_dummies(thyroid_data, drop_first = True)
-td_encoded.head()
+    missing_values = thyroid_data.isnull().sum() #adds if sum is null
+    print(missing_values)
 
-numeric_summary = thyroid_data.describe()
-print(numeric_summary)
+    numeric_columns = thyroid_data.select_dtypes(include=['float64', 'int64']).columns
+    plt.figure(figsize=(4, 4))
+    sns.boxplot(data=thyroid_data[numeric_columns])
+    plt.title('Boxplot:')
+    plt.show()
 
-missing_values = thyroid_data.isnull().sum()
-print(missing_values)
+    mean = thyroid_data[numeric_columns].mean()
+    std_vals = thyroid_data[numeric_columns].std()
 
-numeric_columns = thyroid_data.select_dtypes(include=['float64','int64']).columns
-plt.figure(figsize=(4,4))
-sns.boxplot(data=thyroid_data[numeric_columns])
-plt.title('Boxplot:')
-plt.show()
-
-mean = thyroid_data[numeric_columns].mean()
-std_vals = thyroid_data[numeric_columns].std()
-
-print("Mean: ",mean)
-print("Std values: ",std_vals)
-
-
+    print("Mean: ", mean)
+    print("Std values: ", std_vals)
 
 #A6
-categorical_columns = thyroid_data.select_dtypes(include=['object']).columns
+def a2_q6(file_path):
+    thyroid_data = pd.read_excel(file_path, sheet_name='thyroid0387_UCI')
+    numeric_columns = thyroid_data.select_dtypes(include=['float64', 'int64']).columns
+    categorical_columns = thyroid_data.select_dtypes(include=['object']).columns
 
-for col in numeric_columns:
-    if(thyroid_data[col] - thyroid_data[col].mean()).abs().max() <=3 * thyroid_data[col].std():
-        thyroid_data[col].fillna(thyroid_data[col].mean(), inplace = True)
-    else:
-        thyroid_data[col].fillna(thyroid_data[col].median(), inplace = True)
+    for col in numeric_columns:
+        if (thyroid_data[col] - thyroid_data[col].mean()).abs().max() <= 3 * thyroid_data[col].std():
+            thyroid_data[col].fillna(thyroid_data[col].mean(), inplace=True)
+        else:
+            thyroid_data[col].fillna(thyroid_data[col].median(), inplace=True)
 
-for col in categorical_columns:
-    thyroid_data[col].fillna(thyroid_data[col].mode()[0], inplace = True)
+    for col in categorical_columns:
+        thyroid_data[col].fillna(thyroid_data[col].mode()[0], inplace=True)
 
-missing_values = thyroid_data.isnull().sum()
-
-thyroid_data.head(), missing_values
-
-
+    missing_values = thyroid_data.isnull().sum()
+    print(missing_values)
+    return thyroid_data.head()
 
 #A7
-print(thyroid_data[numeric_columns].describe())
+def a2_q7(file_path):
+    thyroid_data = pd.read_excel(file_path, sheet_name='thyroid0387_UCI')
+    numeric_columns = thyroid_data.select_dtypes(include=[np.number]).columns
 
-scaler = MinMaxScaler()
-thyroid_data_normalized = thyroid_data.copy()
-thyroid_data_normalized[numeric_columns] = scaler.fit_transform(thyroid_data[numeric_columns])
+    scaler = MinMaxScaler()
+    thyroid_data_normalized = thyroid_data.copy()
+    thyroid_data_normalized[numeric_columns] = scaler.fit_transform(thyroid_data[numeric_columns])
+    print(thyroid_data_normalized.head())
 
-print(thyroid_data_normalized.head())
-
-scaler_standard = StandardScaler()
-thyroid_data_standardized = thyroid_data.copy()
-thyroid_data_standardized[numeric_columns] = scaler_standard.fit_transform(thyroid_data[numeric_columns])
-
-print(thyroid_data_standardized.head())
-
-
+    scaler_standard = StandardScaler()
+    thyroid_data_standardized = thyroid_data.copy()
+    thyroid_data_standardized[numeric_columns] = scaler_standard.fit_transform(thyroid_data[numeric_columns])
+    print(thyroid_data_standardized.head())
 
 #A8
-binary_cols = ['FTI', 'T3', 'TSH']
-thyroid_data_withoutnan = thyroid_data[binary_cols].dropna()
+def a2_q8(file_path):
+    thyroid_data = pd.read_excel(file_path, sheet_name='thyroid0387_UCI')
+    binary_cols = ['FTI', 'T3', 'TSH']
+    thyroid_data_withoutnan = thyroid_data[binary_cols].dropna()
 
-vec1 = thyroid_data_withoutnan.iloc[0].values
-vec2 = thyroid_data_withoutnan.iloc[1].values
+    vec1 = thyroid_data_withoutnan.iloc[0].values
+    vec2 = thyroid_data_withoutnan.iloc[1].values
 
-f00 = np.sum((vec1 == 0)&(vec2 == 0))
-f01 = np.sum((vec1 == 0)&(vec2 == 1))
-f10 = np.sum((vec1 == 1)&(vec2 == 0))
-f11 = np.sum((vec1 == 1)&(vec2 == 1))
+    f00 = np.sum((vec1 == 0) & (vec2 == 0))
+    f01 = np.sum((vec1 == 0) & (vec2 == 1))
+    f10 = np.sum((vec1 == 1) & (vec2 == 0))
+    f11 = np.sum((vec1 == 1) & (vec2 == 1))
 
-JC = f11/(f01+f10+f11)
-SMC = (f11+f00)/(f00+f01+f10+f11)
+    JC = f11 / (f01 + f10 + f11) #formula
+    SMC = (f11 + f00) / (f00 + f01 + f10 + f11) #formula
 
-print("JC is: {:.4f}".format(JC))
-print("SMC is: {:.4f}".format(SMC))
-
-
+    print("JC is: {:.4f}".format(JC))
+    print("SMC is: {:.4f}".format(SMC))
 
 #A9
-num_data = thyroid_data.select_dtypes(include=[np.number])
-vec1_full = thyroid_data.loc[0].values
-vec2_full = thyroid_data.loc[1].values
+def a2_q9(file_path):
+    thyroid_data = pd.read_excel(file_path, sheet_name='thyroid0387_UCI')
+    num_data = thyroid_data.select_dtypes(include=[np.number])
+    
+    if len(num_data) >= 2:
+        vec1_full = num_data.iloc[0].values
+        vec2_full = num_data.iloc[1].values
 
-if len(num_data) >= 2:
-    vec1_full = num_data.iloc[0].values
-    vec2_full = num_data.iloc[1].values
-
-    print("Vector 1:", vec1_full)
-    print("Vector 2:", vec2_full)
-
-    cosine_similarity = 1 - cosine(vec1_full, vec2_full)
-    print("Cosine Similarity: {:.4f}".format(cosine_similarity))
-else:
-    print("Cannot find cosine sim")
-
-
+        cosine_similarity = 1 - cosine(vec1_full, vec2_full)
+        print("Cosine Similarity: {:.4f}".format(cosine_similarity))
+    else:
+        print("Cannot find cosine sim")
 
 #A10
-data_set = thyroid_data.iloc[:20]
+def a2_q10(file_path):
+    thyroid_data = pd.read_excel(file_path, sheet_name='thyroid0387_UCI')
+    data_set = thyroid_data.iloc[:20]
 
-for c in data_set.columns:
-    if data_set[c].dtype == 'object':
-        le = LabelEncoder()
-        data_set[c] = le.fit_transform(data_set[c].astype(str))
-        
-data_set2 = data_set.values
+    for c in data_set.columns:
+        if data_set[c].dtype == 'object':
+            le = LabelEncoder()
+            data_set[c] = le.fit_transform(data_set[c].astype(str))
 
-jc_sim = 1-pairwise_distances(data_set2, metric = 'jaccard')
-smc_sim = 1-pairwise_distances(data_set2, metric=lambda u, v: np.sum(u==v) / len(u))
-cosine_sim = 1-pairwise_distances(data_set2, metric = 'cosine')
+    data_set2 = data_set.values
 
-plt.figure(figsize=(8,4))
-sns.heatmap(jc_sim, annot = True, cmap='YlGn') #Green
-plt.title('Jaccard Similarity:')
-plt.show()
+    jc_sim = 1 - pairwise_distances(data_set2, metric='jaccard')
+    smc_sim = 1 - pairwise_distances(data_set2, metric=lambda u, v: np.sum(u == v) / len(u))
+    cosine_sim = 1 - pairwise_distances(data_set2, metric='cosine')
 
-plt.figure(figsize=(8,4))
-sns.heatmap(smc_sim, annot = True, cmap='YlGnBu') #Blue and Green
-plt.title('Simple Matching Similarity:')
-plt.show()
+    plt.figure(figsize=(8, 4))
+    sns.heatmap(jc_sim, annot=True, cmap='YlGn')
+    plt.title('Jaccard Similarity:')
+    plt.show()
 
-plt.figure(figsize=(8,4))
-sns.heatmap(cosine_sim, annot = True, cmap='YlOrRd') #Orange and Red
-plt.title('Cosine Similarity:')
-plt.show()
+    plt.figure(figsize=(8, 4))
+    sns.heatmap(smc_sim, annot=True, cmap='YlGnBu')
+    plt.title('Simple Matching Similarity:')
+    plt.show()
+
+    plt.figure(figsize=(8, 4))
+    sns.heatmap(cosine_sim, annot=True, cmap='YlOrRd')
+    plt.title('Cosine Similarity:')
+    plt.show()
+    
+def main():
+    file_path = r"C:\Users\vvmad\Downloads\5th\ML\lab\Lab Session Data.xlsx"
+
+    a2_q1(file_path)
+
+    a2_q2(file_path)
+
+    a2_q3(file_path)
+
+    a2_q4(file_path)
+
+    a2_q5(file_path)
+
+    a2_q6(file_path)
+
+    a2_q7(file_path)
+
+    a2_q8(file_path)
+
+    a2_q9(file_path)
+
+    a2_q10(file_path)
+
+if __name__ == "__main__":
+    main()
