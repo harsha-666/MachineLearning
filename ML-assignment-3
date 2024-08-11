@@ -8,140 +8,146 @@ import matplotlib.pyplot as plt
 from scipy.spatial.distance import minkowski
 from sklearn.metrics import accuracy_score, confusion_matrix
 
-
-file_path = r"C:\Users\vvmad\Downloads\5th\ML\Lab Session Data.xlsx"
+file_path = r"C:\Users\vvmad\Downloads\5th\ML\lab\Lab Session Data.xlsx"
 thyroid_data = pd.read_excel(file_path, sheet_name = 'thyroid0387_UCI')
 
 #A1
-non_num_cols = thyroid_data.select_dtypes(exclude=[np.number]).columns
-print("columns where there are no numbers or numeric data:", non_num_cols)
+def a3_q1(thyroid_data):
+    non_num_cols = thyroid_data.select_dtypes(exclude=[np.number]).columns
+    print("columns where there are no numbers or numeric data:", non_num_cols)
 
-thyroid_data_num = thyroid_data.drop(columns=non_num_cols)
+    thyroid_data_num = thyroid_data.drop(columns=non_num_cols)
 
-x = thyroid_data_num.iloc[:, :-1].values
-y = thyroid_data.iloc[:, -1].values 
+    x = thyroid_data_num.iloc[:, :-1].values
+    y = thyroid_data.iloc[:, -1].values 
 
-uniques = np.unique(y)
-print("Unique classes in thyroid dataset:", uniques)
+    uniques = np.unique(y)
+    print("Unique classes in thyroid dataset:", uniques)
 
-label_class1 = uniques[0] 
-label_class2 = uniques[1] 
+    label_class1 = uniques[0] 
+    label_class2 = uniques[1] 
 
-class1 = x[y == label_class1]
-class2 = x[y == label_class2]
+    class1 = x[y == label_class1]
+    class2 = x[y == label_class2]
 
-if class1.size > 0 and class2.size > 0:
-    centroid1 = np.mean(class1, axis=0)
-    centroid2 = np.mean(class2, axis=0)
+    if class1.size > 0 and class2.size > 0:
+        centroid1 = np.mean(class1, axis=0)
+        centroid2 = np.mean(class2, axis=0)
 
-    sprd1 = np.std(class1, axis=0)
-    sprd2 = np.std(class2, axis=0)
+        sprd1 = np.std(class1, axis=0)
+        sprd2 = np.std(class2, axis=0)
 
-    dist = np.linalg.norm(centroid1 - centroid2)
+        dist = np.linalg.norm(centroid1 - centroid2)
 
-    print(f"Class 1 ('{label_class1}') centroid:", centroid1)
-    print(f"Class 2 ('{label_class2}') centroid:", centroid2)
-    print(f"Class 1 ('{label_class1}') spread:", sprd1)
-    print(f"Class 2 ('{label_class2}') spread:", sprd2)
-    print("Distance:", dist)
-else:
-    print("Either the excel is not clear or it is unfilled.")
-
-
+        print(f"Class 1 ('{label_class1}') centroid:", centroid1)
+        print(f"Class 2 ('{label_class2}') centroid:", centroid2)
+        print(f"Class 1 ('{label_class1}') spread:", sprd1)
+        print(f"Class 2 ('{label_class2}') spread:", sprd2)
+        print("Distance:", dist)
+    else:
+        print("Either the excel is not clear or it is unfilled.")
+    return x, y
 
 #A2
-ftr = x[:, 0]
+def a3_q2(x):
+    ftr = x[:, 0]
 
-hist, bins = np.histogram(ftr, bins=10)
-plt.hist(ftr, bins=10)
-plt.title('Feature Histogram')
-plt.show()
+    hist, bins = np.histogram(ftr, bins=10)
+    plt.hist(ftr, bins=10)
+    plt.title('Feature Histogram')
+    plt.show()
 
-ftr_mean = np.mean(ftr)
-ftr_var = np.var(ftr)
+    ftr_mean = np.mean(ftr)
+    ftr_var = np.var(ftr)
 
-print("Feature Mean:", ftr_mean)
-print("Feature Variance:", ftr_var)
-
-
+    print("Feature Mean:", ftr_mean)
+    print("Feature Variance:", ftr_var)
 
 #A3
-print("Shape of X:", x.shape)
+def a3_q3(x):
+    print("Shape of X:", x.shape)
 
-if x.shape[1] > 1:
-    ftr1 = x[:, 0]  
-    ftr2 = x[:, 1]  
-    dists = []
+    if x.shape[1] > 1:
+        ftr1 = x[:, 0]  
+        ftr2 = x[:, 1]  
+        dists = []
 
-    for r in range(1, 11):
-        distt = minkowski(ftr1, ftr2, r)
-        dists.append(distt)
+        for r in range(1, 11):
+            distt = minkowski(ftr1, ftr2, r)
+            dists.append(distt)
 
-    plt.plot(range(1, 11), dists)
-    plt.xlabel('Minkowski r')
-    plt.ylabel('Distance')
-    plt.title('Minkowski Distance for r=1 to 10')
-    plt.show()
-else:
-    print("Less or insufficient values")
-
-
+        plt.plot(range(1, 11), dists)
+        plt.xlabel('Minkowski r')
+        plt.ylabel('Distance')
+        plt.title('Minkowski Distance for r=1 to 10')
+        plt.show()
+    else:
+        print("Less or insufficient values")
 
 #A4
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
-print("Shape of training set x:", x_train.shape)
-print("Shape of testing set y:", x_test.shape)
-print("Shape of training set y:", y_train.shape)
-print("Shape of testing set y:", y_test.shape)
-
-
+def a3_q4(x, y):
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+    print("Shape of training set x:", x_train.shape)
+    print("Shape of testing set y:", x_test.shape)
+    print("Shape of training set y:", y_train.shape)
+    print("Shape of testing set y:", y_test.shape)
+    return x_train, x_test, y_train, y_test
 
 #A5
-knn = KNeighborsClassifier(n_neighbors=3)
-knn.fit(x_train, y_train)
-
-
+def a3_q5(x_train, y_train):
+    knn = KNeighborsClassifier(n_neighbors=3)
+    knn.fit(x_train, y_train)
+    return knn
 
 #A6
-acc = knn.score(x_test, y_test)
-print("kNN Accuracy:", acc)
-
-
+def a3_q6(knn, x_test, y_test):
+    acc = knn.score(x_test, y_test)
+    print("kNN Accuracy:", acc)
 
 #A7
-print("Class distribution in training set:", np.unique(y_train, return_counts=True))
-print("Accuracy:", accuracy_score(y_test, predictions))
-print("Confusion Matrix:\n", confusion_matrix(y_test, predictions))
-preds = knn.predict(x_test)
-print("Predictions:", preds)
-
-
-
+def a3_q7(knn, x_test, y_train, y_test):
+    print("Class distribution in training set:", np.unique(y_train, return_counts=True))
+    predictions = knn.predict(x_test)
+    print("Accuracy:", accuracy_score(y_test, predictions))
+    print("Confusion Matrix:\n", confusion_matrix(y_test, predictions))
+    print("Predictions:", predictions)
+    return predictions
 
 #A8
-accs = []
+def a3_q8(x_train, y_train, x_test, y_test):
+    accs = []
 
-for k in range(1, 12):
-    knn = KNeighborsClassifier(n_neighbors=k)
-    knn.fit(x_train, y_train)
-    acc = knn.score(x_test, y_test)
-    accs.append(acc)
+    for k in range(1, 12):
+        knn = KNeighborsClassifier(n_neighbors=k)
+        knn.fit(x_train, y_train)
+        acc = knn.score(x_test, y_test)
+        accs.append(acc)
 
-plt.plot(range(1, 12), accs)
-plt.xlabel('k')
-plt.ylabel('Accuracy')
-plt.title('k-NN Accuracy for varying k')
-plt.show()
-
-
+    plt.plot(range(1, 12), accs)
+    plt.xlabel('k')
+    plt.ylabel('Accuracy')
+    plt.title('k-NN Accuracy for varying k')
+    plt.show()
 
 #A9
-conf_mat = confusion_matrix(y_test, predictions) #already printed in A7
-prec = precision_score(y_test, preds, average='macro')
-recall = recall_score(y_test, preds, average='macro')
-f1 = f1_score(y_test, predictions, average='macro')
+def a3_q9(y_test, preds, predictions):
+    conf_mat = confusion_matrix(y_test, predictions) #already printed in A7
+    prec = precision_score(y_test, preds, average='macro')
+    recall = recall_score(y_test, preds, average='macro')
+    f1 = f1_score(y_test, predictions, average='macro')
 
-print("Confusion Matrix:\n", conf_mat)
-print("Precision:", prec)
-print("Recall:", recall)
-print("F1 Score:", f1)
+    print("Confusion Matrix:\n", conf_mat)
+    print("Precision:", prec)
+    print("Recall:", recall)
+    print("F1 Score:", f1)
+
+#Calling all questions as functions
+x, y = a3_q1(thyroid_data)
+a3_q2(x)
+a3_q3(x)
+x_train, x_test, y_train, y_test = a3_q4(x, y)
+knn = a3_q5(x_train, y_train)
+a3_q6(knn, x_test, y_test)
+predictions = a3_q7(knn, x_test, y_train, y_test)
+a3_q8(x_train, y_train, x_test, y_test)
+a3_q9(y_test, predictions, predictions)
