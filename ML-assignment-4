@@ -1,1 +1,170 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, mean_squared_error, mean_absolute_percentage_error, r2_score
+from sklearn.impute import SimpleImputer
+import matplotlib.pyplot as plt
+from sklearn.model_selection import GridSearchCV
 
+#A1
+def a4_q1(file_path):
+    thyroid_proj_dataset = pd.read_excel(file_path, sheet_name='thyroid0387_UCI')
+    non_num_cols = thyroid_proj_dataset.select_dtypes(exclude=[np.number]).columns
+    print("Non-numeric columns:", non_num_cols)
+    
+    thyroid_proj_dataset_num = thyroid_proj_dataset.drop(columns=non_num_cols)
+    x = thyroid_proj_dataset_num.iloc[:, :-1].values
+    y = thyroid_proj_dataset.iloc[:, -1].values
+    print("Missing values in x:", np.isnan(x).sum())
+    print("Missing values in y:", pd.isnull(y).sum())
+    
+    imputer = SimpleImputer(strategy='mean')
+    x = imputer.fit_transform(x)
+    
+    x_train, x_test, feature2_train, feature2_test = train_test_split(x, y, test_size=0.3, random_state=42)
+    
+    knn = KNeighborsClassifier(n_neighbors=3)
+    knn.fit(x_train, feature2_train)
+    acc = knn.score(x_test, feature2_test)
+    preds = knn.predict(x_test)
+    
+    print("kNN Accuracy:", acc)
+    print("Accuracy:", accuracy_score(feature2_test, preds))
+    print("Confusion Matrix:\n", confusion_matrix(feature2_test, preds))
+    print("Predictions:", preds)
+    
+    return x_train, x_test, feature2_train, feature2_test
+
+#A2
+def a4_q2(file_path):
+    xl = pd.ExcelFile(file_path)
+    price = pd.read_excel(xl, sheet_name='IRCTC Stock Price')
+    price['Predicted_Price'] = price['Price'].shift(1)
+    price = price.dropna()
+    
+    realprice = price['Price'].values
+    assumedprice = price['Predicted_Price'].values
+    
+    mse = mean_squared_error(realprice, assumedprice)
+    rmse = np.sqrt(mse)
+    mape = mean_absolute_percentage_error(realprice, assumedprice)
+    r2 = r2_score(realprice, assumedprice)
+    
+    print("mse is:", mse)
+    print("rmse is:", rmse)
+    print("mape is:", mape)
+    print("r2 score is:", r2)
+
+#A3
+def a4_q3(file_path):
+    proj_dataset = pd.read_csv(file_path)
+    feature1 = proj_dataset[['cc_embedding_1', 'cc_embedding_2']].values
+    feature2 = proj_dataset['Final_Marks'].values
+    
+    feature1_train = feature1[(feature1[:, 0] >= 1) & (feature1[:, 0] <= 10) & (feature1[:, 1] >= 1) & (feature1[:, 1] <= 10)]
+    feature2_train = feature2[(feature1[:, 0] >= 1) & (feature1[:, 0] <= 10) & (feature1[:, 1] >= 1) & (feature1[:, 1] <= 10)]
+    
+    plt.scatter(feature1_train[feature2_train == 0][:, 0], feature1_train[feature2_train == 0][:, 1], color='blue', label='Class 0')
+    plt.scatter(feature1_train[feature2_train == 1][:, 0], feature1_train[feature2_train == 1][:, 1], color='red', label='Class 1')
+    plt.xlabel('cc_embedding_1')
+    plt.ylabel('cc_embedding_2')
+    plt.legend()
+    plt.title('Training Data')
+    plt.show()
+    
+    return feature1_train, feature2_train
+
+#A4
+def a4_q4(feature1_train, feature2_train):
+    feature1_test = np.array([[x, y] for x in np.arange(1, 10.1, 0.1) for y in np.arange(1, 10.1, 0.1)])
+    knn = KNeighborsClassifier(n_neighbors=3)
+    knn.fit(feature1_train, feature2_train)
+    feature2_test_pred = knn.predict(feature1_test)
+    
+    plt.scatter(feature1_test[feature2_test_pred == 0][:, 0], feature1_test[feature2_test_pred == 0][:, 1], color='blue', label='Class 0')
+    plt.scatter(feature1_test[feature2_test_pred == 1][:, 0], feature1_test[feature2_test_pred == 1][:, 1], color='red', label='Class 1')
+    plt.xlabel('cc_embedding_1')
+    plt.ylabel('cc_embedding_2')
+    plt.legend()
+    plt.title('Test data for k=3')
+    plt.show()
+
+
+#A5
+def a4_q5(feature1_train, feature2_train):
+    feature1_test = np.array([[x, y] for x in np.arange(1, 10.1, 0.1) for y in np.arange(1, 10.1, 0.1)])
+    for k in [1, 5, 7, 9]:
+        knn = KNeighborsClassifier(n_neighbors=k)
+        knn.fit(feature1_train, feature2_train)
+        feature2_test_pred = knn.predict(feature1_test)
+        
+        plt.scatter(feature1_test[feature2_test_pred == 0][:, 0], feature1_test[feature2_test_pred == 0][:, 1], color='blue', label='Class 0')
+        plt.scatter(feature1_test[feature2_test_pred == 1][:, 0], feature1_test[feature2_test_pred == 1][:, 1], color='red', label='Class 1')
+        plt.xlabel('cc_embedding_1')
+        plt.ylabel('cc_embedding_2')
+        plt.legend()
+        plt.title(f'Test Data for (k={k})')
+        plt.show()
+
+#A6
+def a4_q6(file_path):
+    proj_dataset = pd.read_csv(file_path)
+    feature1_train = proj_dataset[['cc_embedding_3', 'cc_embedding_4']].values[:20]
+    feature2_train = proj_dataset['error_count'].values[:20]
+    return feature1_train, feature2_train
+
+#A7
+def a4_q7(feature1_train, feature2_train):
+    param_grid = {'n_neighbors': np.arange(1, 21)}
+    grid_search = GridSearchCV(KNeighborsClassifier(), param_grid, cv=5)
+    grid_search.fit(feature1_train, feature2_train)
+    
+    best_k = grid_search.best_params_['n_neighbors']
+    print(f'Best k value found: {best_k}')
+    
+    best_knn = KNeighborsClassifier(n_neighbors=best_k)
+    best_knn.fit(feature1_train, feature2_train)
+    feature1_test = np.array([[x, y] for x in np.arange(1, 10.1, 0.1) for y in np.arange(1, 10.1, 0.1)])
+    project_feature2_test_pred = best_knn.predict(feature1_test)
+    
+    plt.scatter(feature1_test[project_feature2_test_pred == 0][:, 0], feature1_test[project_feature2_test_pred == 0][:, 1], color='blue', label='Class 0')
+    plt.scatter(feature1_test[project_feature2_test_pred == 1][:, 0], feature1_test[project_feature2_test_pred == 1][:, 1], color='red', label='Class 1')
+    plt.xlabel('cc_embedding_1')
+    plt.ylabel('cc_embedding_2')
+    plt.legend()
+    plt.title(f'Test data for (best k={best_k})')
+    plt.show()
+
+#Main funct
+def main():
+    file_path = r"C:\Users\vvmad\Downloads\5th\ML\lab\Lab Session Data.xlsx"
+    file_path_cc = r"C:\Users\vvmad\Downloads\5th\ML\HM7 - Java\java_cc_embed_data.csv"
+    #file_path is provided dataset
+    #file_path_cc is our project dataset
+    
+    #A1
+    x_train, x_test, feature2_train, feature2_test = a4_q1(file_path)
+    
+    #A2
+    a4_q2(file_path)
+    
+    #A3
+    feature1_train, feature2_train = a4_q3(file_path_cc)
+    
+    #A4
+    a4_q4(feature1_train, feature2_train)
+    
+    #A5
+    a4_q5(feature1_train, feature2_train)
+    
+    #A6
+    feature1_train, feature2_train = a4_q6(file_path_cc)
+    
+    #A7
+    a4_q7(feature1_train, feature2_train)
+
+
+#Calling the main func
+if __name__ == "__main__":
+    main()
