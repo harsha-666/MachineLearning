@@ -1,1 +1,66 @@
+#A1
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, accuracy_score
+from sklearn.impute import SimpleImputer
+
+path_of_file = r"C:\Users\vvmad\Downloads\5th\ML\lab\Lab Session Data.xlsx"
+thyroid_proj_dataset = pd.read_excel(path_of_file, sheet_name='thyroid0387_UCI')
+
+non_num_cols = thyroid_proj_dataset.select_dtypes(exclude=[np.number]).columns
+print("Non-numeric columns:", non_num_cols)
+
+thyroid_proj_dataset_num = thyroid_proj_dataset.drop(columns=non_num_cols)
+
+x = thyroid_proj_dataset_num.iloc[:, :-1].values
+y = thyroid_proj_dataset.iloc[:, -1].values 
+
+print("Missing values in x:", np.isnan(x).sum())
+print("Missing values in y:", pd.isnull(y).sum())  
+
+imputer = SimpleImputer(strategy='mean')
+
+x = imputer.fit_transform(x)
+x_train, x_test, feature2_train, feature2_test = train_test_split(x, y, test_size=0.3, random_state=42)
+
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(x_train, feature2_train)
+acc = knn.score(x_test, feature2_test)
+preds = knn.predict(x_test)  
+
+print("kNN Accuracy:", acc)
+print("Accuracy:", accuracy_score(feature2_test, preds))  
+print("Confusion Matrix:\n", confusion_matrix(feature2_test, preds))  
+print("Predictions:", preds)
+
+
+
+#A2
+import pandas as pd
+import numpy as np
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
+
+path_of_file = r"C:\Users\vvmad\Downloads\5th\ML\lab\Lab Session Data.xlsx"
+xl = pd.ExcelFile(path_of_file)
+
+price = pd.read_excel(xl, sheet_name = 'IRCTC Stock Price')
+price['Predicted_Price'] = price['Price'].shift(1)
+price = price.dropna()
+
+realprice = price['Price'].values
+assumedprice = price['Predicted_Price'].values
+
+mse = mean_squared_error(realprice, assumedprice)
+rmse = np.sqrt(mse)
+mape = mean_absolute_percentage_error(realprice, assumedprice)
+r2 = r2_score(realprice, assumedprice)
+
+print("mse is:",mse)
+print("rmse is:",rmse)
+print("mape is:",mape)
+print("r2 score is:",r2)
+
+
 
