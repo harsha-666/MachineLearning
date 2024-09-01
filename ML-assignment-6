@@ -243,3 +243,4 @@ clf = MLPClassifier(hidden_layer_sizes=(2,), activation='logistic', learning_rat
 clf.fit(x[:, 1:], t)  
 preds = clf.predict(x[:, 1:])
 print("Project Data Predictions:", preds)
+#End of code
