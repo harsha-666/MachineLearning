@@ -1,1 +1,1 @@
-GitHub Repository for College Machine Learning Assignments
+GitHub Repository for College Machine Learning Assignments.
